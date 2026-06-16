@@ -12,6 +12,8 @@ import PlaygroundPage from './pages/PlaygroundPage.jsx';
 import ChallengePage from './pages/ChallengePage.jsx';
 import ChallengesPage from './pages/ChallengesPage.jsx';
 import DashboardPage from './pages/DashboardPage.jsx';
+import LeaderboardPage from './pages/LeaderboardPage.jsx';
+import ReviewPage from './pages/ReviewPage.jsx';
 import AuthPage from './pages/AuthPage.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import { T } from './theme.js';
@@ -52,6 +54,8 @@ export default function App() {
           <Route path="/challenges"             element={<ProtectedRoute><ChallengesPage /></ProtectedRoute>} />
           <Route path="/challenge/:challengeId" element={<ProtectedRoute><ChallengePage /></ProtectedRoute>} />
           <Route path="/dashboard"              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/leaderboard"            element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+          <Route path="/review"                 element={<ProtectedRoute><ReviewPage /></ProtectedRoute>} />
           <Route path="*"                       element={<NotFound />} />
         </Routes>
       </main>
@@ -94,7 +98,7 @@ function Footer() {
           </div>
           <div>
             <div style={{ fontSize: 11, color: T.t2, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 }}>Practice</div>
-            {[['/challenges', 'Challenges'], ['/playground', 'Playground'], ['/dashboard', 'Dashboard']].map(([to, label]) => (
+            {[['/challenges', 'Challenges'], ['/playground', 'Playground'], ['/review', 'Spaced Review'], ['/leaderboard', 'Leaderboard'], ['/dashboard', 'Dashboard']].map(([to, label]) => (
               <a key={to} href={to} style={{ display: 'block', fontSize: 12, color: T.t3, textDecoration: 'none', marginBottom: 5 }}
                 onMouseEnter={e => e.currentTarget.style.color = T.gn}
                 onMouseLeave={e => e.currentTarget.style.color = T.t3}>{label}</a>

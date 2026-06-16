@@ -47,10 +47,12 @@ export default function Navbar() {
   const isActive = path => pathname === path || pathname.startsWith(path + '/');
 
   const navLinks = [
-    { to: '/challenges', label: '⚔️ Challenges', color: T.gn },
-    { to: '/playground', label: '▶ Playground',  color: T.cy },
-    { to: '/roadmap',    label: '🗺️ Roadmap',    color: T.pu },
-    { to: '/dashboard',  label: '📊 Dashboard',  color: T.or },
+    { to: '/challenges',  label: '⚔️ Challenges', color: T.gn },
+    { to: '/playground',  label: '▶ Playground',  color: T.cy },
+    { to: '/review',      label: '📚 Review',      color: T.pu },
+    { to: '/leaderboard', label: '🏆 Leaderboard', color: T.ye },
+    { to: '/roadmap',     label: '🗺️ Roadmap',    color: T.or },
+    { to: '/dashboard',   label: '📊 Dashboard',  color: T.pi || T.cy },
   ];
 
   const linkStyle = (l) => ({

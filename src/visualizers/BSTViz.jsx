@@ -46,6 +46,7 @@ export default function BSTViz({ color }) {
   const [searchPath, setSearchPath] = useState([]);
   const [searching,  setSearching]  = useState(false);
   const [op, setOp] = useState('insert'); // insert | delete | search
+  const [customNodes, setCustomNodes] = useState([...DEFAULT_VALS]);
   const intervalRef = useRef(null);
   const newNodeRef  = useRef(null);
 
@@ -104,13 +105,30 @@ export default function BSTViz({ color }) {
     if (op === 'insert') {
       setRoot(r => insertBST(r, v));
       newNodeRef.current = v;
+      setCustomNodes(ns => ns.includes(v) ? ns : [...ns, v]);
     } else if (op === 'delete') {
       setRoot(r => deleteBST(r, v));
+      setCustomNodes(ns => ns.filter(n => n !== v));
     } else {
       doSearch(v);
     }
     setInp(''); setTrav([]); setTravIdx(-1); setVisVal(null);
     if (op !== 'search') setSearchPath([]);
+  };
+
+  const resetToDefault = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    let r = null;
+    DEFAULT_VALS.forEach(v => { r = insertBST(r, v); });
+    setRoot(r);
+    setCustomNodes([...DEFAULT_VALS]);
+    setTrav([]); setTravIdx(-1); setVisVal(null); setSearchPath([]);
+  };
+
+  const removeNode = (v) => {
+    setRoot(r => deleteBST(r, v));
+    setCustomNodes(ns => ns.filter(n => n !== v));
+    setTrav([]); setTravIdx(-1); setVisVal(null); setSearchPath([]);
   };
 
   const nodeState = val => {
@@ -147,8 +165,21 @@ export default function BSTViz({ color }) {
         <input value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleOp()} placeholder="1-999"
           style={{ width: 80, padding: '5px 8px', borderRadius: 8, border: `1px solid ${opColor}50`, background: T.s2, color: T.t0, fontSize: 13, outline: 'none', fontFamily: 'inherit' }} />
         <button onClick={handleOp} style={{ padding: '5px 14px', borderRadius: 8, background: opColor + '25', border: `1px solid ${opColor}60`, color: opColor, fontWeight: 700, cursor: 'pointer', fontSize: 12 }}>{op === 'insert' ? '+ Insert' : op === 'delete' ? '− Delete' : '⌕ Search'}</button>
-        <button onClick={() => { let r = null; DEFAULT_VALS.forEach(v => { r = insertBST(r, v); }); setRoot(r); setTrav([]); setTravIdx(-1); setVisVal(null); setSearchPath([]); }} style={{ padding: '5px 11px', borderRadius: 8, border: `1px solid ${T.bd}`, background: 'transparent', color: T.t2, cursor: 'pointer', fontSize: 11 }}>Reset</button>
+        <button onClick={resetToDefault} style={{ padding: '5px 11px', borderRadius: 8, border: `1px solid ${T.bd}`, background: 'transparent', color: T.t2, cursor: 'pointer', fontSize: 11 }}>↺ Reset</button>
       </div>
+
+      {/* Node chips */}
+      {customNodes.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8, padding: '8px 10px', background: T.s2, borderRadius: 9, border: `1px solid ${T.bd}` }}>
+          <span style={{ fontSize: 10, color: T.t3, alignSelf: 'center', marginRight: 2 }}>Nodes:</span>
+          {[...customNodes].sort((a, b) => a - b).map(v => (
+            <span key={v} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, padding: '2px 7px', borderRadius: 12, background: nc(v) ? nc(v) + '20' : T.s1, border: `1px solid ${nc(v) ? nc(v) + '60' : T.bd}`, color: nc(v) || T.t1, fontSize: 11, fontWeight: 600 }}>
+              {v}
+              <button onClick={() => removeNode(v)} style={{ background: 'none', border: 'none', color: T.t3, cursor: 'pointer', padding: '0 1px', fontSize: 10, lineHeight: 1 }}>×</button>
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* SVG */}
       <div style={{ background: T.s1, borderRadius: 12, border: `1px solid ${T.bd}`, overflow: 'hidden', marginBottom: 10 }}>

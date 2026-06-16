@@ -7,6 +7,36 @@ import { getTopicById } from '../data/topics.js';
 import CodeEditor, { runUserCode, compareResult, XpBadge } from '../components/CodeEditor.jsx';
 import { useProgressCtx } from '../context/ProgressContext.jsx';
 
+function getAdaptiveHint(testResults, challenge, attempts) {
+  if (!testResults.length) return null;
+
+  const errors  = testResults.filter(r => r?.error);
+  const failed  = testResults.filter((r, i) => r && !r.error && !compareResult(r.result, challenge.testCases[i].expected, challenge.testCases[i].comparator || challenge.comparator));
+  const passed  = testResults.filter((r, i) => r && !r.error && compareResult(r.result, challenge.testCases[i].expected, challenge.testCases[i].comparator || challenge.comparator));
+
+  if (errors.length === testResults.length) {
+    const errMsg = errors[0]?.error || '';
+    if (errMsg.includes('is not defined') || errMsg.includes('ReferenceError')) return '💡 A variable or function name is undefined. Check spelling and make sure all variables are declared before use.';
+    if (errMsg.includes('is not a function') || errMsg.includes('TypeError')) return '💡 A value is being called like a function but isn\'t one. Check your function names and method calls.';
+    if (errMsg.includes('SyntaxError')) return '💡 Syntax error detected. Check for missing brackets, parentheses, or semicolons.';
+    if (errMsg.includes('Cannot read prop') || errMsg.includes('null')) return '💡 Trying to access a property of null/undefined. Add null checks before accessing nested properties.';
+    return `💡 Runtime error: ${errMsg.slice(0, 80)}`;
+  }
+
+  if (passed.length > 0 && failed.length > 0) {
+    const failedCases = failed.map((_, i) => challenge.testCases[i]).filter(Boolean);
+    const hasZero = failedCases.some(tc => JSON.stringify(tc?.input).includes('0') || JSON.stringify(tc?.input).includes('[]') || JSON.stringify(tc?.input).includes('""'));
+    if (hasZero) return '💡 Some tests pass but edge cases fail. Consider: empty arrays [], zero values, single elements, and negative numbers.';
+    return `💡 ${passed.length}/${testResults.length} tests pass. Focus on the failing inputs — what\'s different about them?`;
+  }
+
+  if (failed.length === testResults.length && attempts > 2) {
+    return '💡 All tests fail. Double-check: (1) your function name matches exactly, (2) you return a value (not just print), (3) the logic handles the base case.';
+  }
+
+  return null;
+}
+
 function TestResult({ tc, result, idx, comparator }) {
   const passed = result && compareResult(result.result, tc.expected, tc.comparator || comparator);
   const error  = result?.error;
@@ -57,6 +87,7 @@ export default function ChallengePage() {
   const [showSolution, setShowSolution] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
   const [attempts, setAttempts] = useState(0);
+  const [adaptiveHint, setAdaptiveHint] = useState(null);
 
   const headerRef = useRef(null);
   const { progress, solveChallenge } = useProgressCtx();
@@ -99,6 +130,7 @@ export default function ChallengePage() {
         return r ? { result: r.result, error: null } : { result: undefined, error: 'No result' };
       });
       setTestResults(mapped);
+      setAdaptiveHint(getAdaptiveHint(mapped, challenge, attempts + 1));
       const allPass = mapped.every((r, i) => !r.error && compareResult(r.result, challenge.testCases[i].expected, challenge.testCases[i].comparator || challenge.comparator));
       if (allPass && !alreadySolved) {
         setSolved(true);
@@ -268,6 +300,13 @@ export default function ChallengePage() {
               ))}
             </div>
           </div>
+
+          {/* Adaptive hint */}
+          {adaptiveHint && (
+            <div style={{ padding: '12px 14px', borderRadius: 9, background: T.cy + '10', border: `1px solid ${T.cy}30`, marginTop: 0, fontSize: 12, color: T.cy, lineHeight: 1.7 }}>
+              {adaptiveHint}
+            </div>
+          )}
 
           {/* Success banner */}
           {(solved && !alreadySolved) && (

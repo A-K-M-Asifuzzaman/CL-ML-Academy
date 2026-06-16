@@ -18,7 +18,7 @@ function useIsMobile(bp = 768) {
 const LANGUAGES = [
   { value: 'javascript', label: 'JavaScript',  short: 'JS',    icon: '🟨', monacoLang: 'javascript', pistonLang: null,          pistonVer: null,     ext: 'js',    execMode: 'browser' },
   { value: 'typescript', label: 'TypeScript',  short: 'TS',    icon: '🟦', monacoLang: 'typescript', pistonLang: 'typescript',  pistonVer: '5.0.3',  ext: 'ts',    execMode: 'piston'  },
-  { value: 'python',     label: 'Python',      short: 'Py',    icon: '🐍', monacoLang: 'python',     pistonLang: 'python',      pistonVer: '3.10.0', ext: 'py',    execMode: 'piston'  },
+  { value: 'python',     label: 'Python',      short: 'Py',    icon: '🐍', monacoLang: 'python',     pistonLang: 'python',      pistonVer: '3.10.0', ext: 'py',    execMode: 'pyodide' },
   { value: 'java',       label: 'Java',        short: 'Java',  icon: '☕', monacoLang: 'java',       pistonLang: 'java',        pistonVer: '15.0.2', ext: 'java',  execMode: 'piston'  },
   { value: 'cpp',        label: 'C++',         short: 'C++',   icon: '⚙️', monacoLang: 'cpp',        pistonLang: 'c++',         pistonVer: '10.2.0', ext: 'cpp',   execMode: 'piston'  },
   { value: 'c',          label: 'C',           short: 'C',     icon: '🔵', monacoLang: 'c',          pistonLang: 'c',           pistonVer: '10.2.0', ext: 'c',     execMode: 'piston'  },
@@ -483,6 +483,44 @@ console.log('reduce:', t(()=>a.reduce((s,x)=>s+x,0)));
 console.log('map   :', t(()=>a.map(x=>x*2)));` },
 ];
 
+// ── Pyodide (Python/WASM) ───────────────────────────────────────────────
+let _pyodideInstance = null;
+let _pyodidePromise  = null;
+
+function loadPyodideScript() {
+  return new Promise((resolve, reject) => {
+    if (window.loadPyodide) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function getPyodide() {
+  if (_pyodideInstance) return _pyodideInstance;
+  if (_pyodidePromise)  return _pyodidePromise;
+  _pyodidePromise = (async () => {
+    await loadPyodideScript();
+    const py = await window.loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.4/full/' });
+    _pyodideInstance = py;
+    return py;
+  })();
+  return _pyodidePromise;
+}
+
+async function runWithPyodide(code) {
+  const py = await getPyodide();
+  py.runPython(`import sys, io\n_buf_out=io.StringIO()\n_buf_err=io.StringIO()\nsys.stdout=_buf_out\nsys.stderr=_buf_err`);
+  let error = null;
+  try { await py.runPythonAsync(code); } catch (e) { error = e.message; }
+  const stdout = py.runPython('_buf_out.getvalue()');
+  const stderr = py.runPython('_buf_err.getvalue()');
+  py.runPython('sys.stdout=sys.__stdout__\nsys.stderr=sys.__stderr__');
+  return { stdout, stderr, error };
+}
+
 // ── Piston API ──────────────────────────────────────────────────────────
 const PISTON_URL = 'https://emkc.org/api/v2/piston/execute';
 async function runWithPiston(ld, code) {
@@ -491,7 +529,8 @@ async function runWithPiston(ld, code) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ language: ld.pistonLang, version: ld.pistonVer, files: [{ name: `main.${ld.ext}`, content: code }], stdin: '', args: [] }),
   });
-  if (!res.ok) throw new Error(`Piston ${res.status}`);
+  if (res.status === 401) throw new Error('API_AUTH');
+  if (!res.ok) throw new Error(`API_${res.status}`);
   return res.json();
 }
 
@@ -526,6 +565,21 @@ export default function PlaygroundPage() {
     t0.current = performance.now();
 
     try {
+      if (cur.execMode === 'pyodide') {
+        setOutput([{ kind: 'system', text: '🐍 Loading Python/WASM (Pyodide)…' }]);
+        const { stdout, stderr, error } = await runWithPyodide(code);
+        const ms = (performance.now() - t0.current).toFixed(0);
+        setElapsed(ms);
+        const lines = [];
+        if (stdout) stdout.split('\n').filter(Boolean).forEach(l => lines.push({ kind: 'log', text: l }));
+        if (stderr) stderr.split('\n').filter(Boolean).forEach(l => lines.push({ kind: 'error', text: l }));
+        if (error && !stderr) lines.push({ kind: 'error', text: error });
+        if (!lines.length) lines.push({ kind: 'system', text: '(no output)' });
+        setOutput(lines);
+        recordPlaygroundRun?.();
+        setRunning(false);
+        return;
+      }
       if (cur.execMode === 'browser') {
         const result = await runFreeformCode(code);
         const ms = (performance.now() - t0.current).toFixed(1);
@@ -552,7 +606,12 @@ export default function PlaygroundPage() {
       }
     } catch (e) {
       setElapsed(null);
-      setOutput([{ kind: 'error', text: `Error: ${e.message}\n\n(Piston API requires internet access)` }]);
+      const msg = e.message === 'API_AUTH'
+        ? `The remote execution API requires authentication.\n\nTip: Switch to Python 🐍 — it runs instantly in-browser via WebAssembly (no API needed).`
+        : e.message?.startsWith('API_')
+          ? `API error (${e.message.replace('API_', '')}). Check your internet connection and try again.`
+          : `Error: ${e.message}`;
+      setOutput([{ kind: 'error', text: msg }]);
     } finally {
       setRunning(false);
     }
@@ -573,7 +632,7 @@ export default function PlaygroundPage() {
         <div style={{ fontSize: 10, color: T.cy, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 4 }}>Interactive</div>
         <h1 style={{ fontSize: isMobile ? 20 : 26, fontWeight: 800, color: T.t0, margin: '0 0 5px' }}>Code Playground</h1>
         <p style={{ color: T.t2, fontSize: 12, margin: 0, lineHeight: 1.6 }}>
-          {LANGUAGES.length} languages · JS runs in-browser · others via <span style={{ color: T.cy }}>Piston API</span>
+          {LANGUAGES.length} languages · JS &amp; Python run in-browser via WASM · others via <span style={{ color: T.cy }}>Piston API</span>
           {!isMobile && <> · <kbd style={{ background: T.s2, border: `1px solid ${T.bd}`, borderRadius: 4, padding: '1px 5px', fontSize: 10, color: T.cy }}>⌘+Enter</kbd> to run</>}
         </p>
       </div>
@@ -587,6 +646,7 @@ export default function PlaygroundPage() {
             <span style={{ fontSize: 18 }}>{cur.icon}</span>
             <span style={{ fontWeight: 600 }}>{cur.label}</span>
             {cur.execMode === 'browser'  && <span style={{ fontSize: 10, color: T.gn, background: T.gn+'18', padding: '2px 7px', borderRadius: 8 }}>⚡ Instant</span>}
+            {cur.execMode === 'pyodide'  && <span style={{ fontSize: 10, color: T.gn, background: T.gn+'18', padding: '2px 7px', borderRadius: 8 }}>🐍 WASM</span>}
             {cur.execMode === 'display'  && <span style={{ fontSize: 10, color: T.t3, background: T.s3, padding: '2px 7px', borderRadius: 8 }}>View only</span>}
             {cur.execMode === 'piston'   && <span style={{ fontSize: 10, color: T.cy, background: T.cy+'12', padding: '2px 7px', borderRadius: 8 }}>🌐 API</span>}
             <span style={{ marginLeft: 'auto', color: T.t3, fontSize: 13 }}>{langOpen ? '▲' : '▼'}</span>
@@ -714,9 +774,11 @@ export default function PlaygroundPage() {
               <div style={{ color: T.t3, fontSize: 12, lineHeight: 1.7 }}>
                 {cur.execMode === 'display'
                   ? `📋 ${cur.label} — view-only, no execution.`
-                  : cur.execMode === 'piston'
-                    ? `▶ Click Run to execute ${cur.label} via Piston API…`
-                    : '▶ Click Run or press ⌘+Enter to execute JavaScript…'}
+                  : cur.value === 'python'
+                    ? '▶ Click Run to execute Python via Pyodide (WebAssembly)…'
+                    : cur.execMode === 'piston'
+                      ? `▶ Click Run to execute ${cur.label} via Piston API…`
+                      : '▶ Click Run or press ⌘+Enter to execute JavaScript…'}
               </div>
             ) : output.map((line, i) => (
               <div key={i} style={{ color: LC[line.kind] || T.t1, marginBottom: 3, display: 'flex', gap: 7, alignItems: 'flex-start' }}>
@@ -732,9 +794,11 @@ export default function PlaygroundPage() {
             <div style={{ fontSize: 11, color: T.t2, lineHeight: 1.6 }}>
               {cur.execMode === 'browser'
                 ? '⚡ JS runs in a sandboxed iframe — instant, no server.'
-                : cur.execMode === 'piston'
-                  ? `🌐 ${cur.label} ${cur.pistonVer} runs on the free Piston API.`
-                  : `📋 ${cur.label} shown for syntax reference only.`}
+                : cur.value === 'python'
+                  ? '🐍 Python runs via Pyodide (WebAssembly) — no server, loads once ~8MB)'
+                  : cur.execMode === 'piston'
+                    ? `🌐 ${cur.label} ${cur.pistonVer} runs on the free Piston API.`
+                    : `📋 ${cur.label} shown for syntax reference only.`}
             </div>
             {!isMobile && <div style={{ fontSize: 10, color: T.t3, marginTop: 4 }}>⌘+Enter to run · Clear resets output</div>}
           </div>

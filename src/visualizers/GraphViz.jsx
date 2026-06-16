@@ -27,6 +27,32 @@ const POS = [
   { x:375, y:278 }, // 9
 ];
 
+// Parse custom edge input like "0-1:4, 1-2:3, 2-3:1"
+function parseCustomEdges(text) {
+  const adj = {}, weights = {};
+  const edges = text.split(/[,\n]/).map(s => s.trim()).filter(Boolean);
+  const nodes = new Set();
+  for (const e of edges) {
+    const m = e.match(/^(\d+)-(\d+)(?::(\d+))?$/);
+    if (!m) continue;
+    const [, a, b, w] = m.map(Number);
+    nodes.add(a); nodes.add(b);
+    adj[a] = adj[a] || []; adj[b] = adj[b] || [];
+    if (!adj[a].includes(b)) adj[a].push(b);
+    if (!adj[b].includes(a)) adj[b].push(a);
+    const key = `${Math.min(a,b)}-${Math.max(a,b)}`;
+    weights[key] = w || 1;
+  }
+  const nodeArr = Array.from(nodes).sort((a,b)=>a-b);
+  const cx = 280, cy = 160, r = 140;
+  const pos = {};
+  nodeArr.forEach((n, i) => {
+    const angle = (2*Math.PI*i/nodeArr.length) - Math.PI/2;
+    pos[n] = { x: cx + r*Math.cos(angle), y: cy + r*Math.sin(angle) };
+  });
+  return { adj, weights, pos, nc: nodeArr.length, nodes: nodeArr };
+}
+
 // Dijkstra generator
 function* genDijkstra(adj, weights, src, nc) {
   const dist  = Array(nc).fill(Infinity);
@@ -58,15 +84,25 @@ function* genDijkstra(adj, weights, src, nc) {
 }
 
 export default function GraphViz({ color }) {
-  const [mode, setMode]   = useState('bfs');
-  const [start, setStart] = useState(0);
-  const [showW, setShowW] = useState(true);
+  const [mode, setMode]         = useState('bfs');
+  const [start, setStart]       = useState(0);
+  const [showW, setShowW]       = useState(true);
+  const [customMode, setCustomMode] = useState(false);
+  const [customEdges, setCustomEdges] = useState('');
+  const [customAdj, setCustomAdj]   = useState(null);
+
+  // Active graph data — either custom or preset
+  const activeAdj     = customAdj ? customAdj.adj     : ADJ;
+  const activeWeights = customAdj ? customAdj.weights  : WEIGHTS;
+  const activePOS     = customAdj ? customAdj.pos      : POS;
+  const activeNC      = customAdj ? customAdj.nc       : NC;
+  const activeNodes   = customAdj ? customAdj.nodes    : Array.from({ length: NC }, (_, i) => i);
 
   const sim = useSim(() => {
-    if (mode === 'bfs')      return genBFS(ADJ, start, NC);
-    if (mode === 'dfs')      return genDFS(ADJ, start, NC);
-    return genDijkstra(ADJ, WEIGHTS, start, NC);
-  }, [mode, start]);
+    if (mode === 'bfs')      return genBFS(activeAdj, start, activeNC);
+    if (mode === 'dfs')      return genDFS(activeAdj, start, activeNC);
+    return genDijkstra(activeAdj, activeWeights, start, activeNC);
+  }, [mode, start, customAdj]);
 
   const st = sim.state;
 
@@ -88,7 +124,7 @@ export default function GraphViz({ color }) {
   };
 
   const edges = [];
-  for (let u = 0; u < NC; u++) for (const v of (ADJ[u] || [])) if (v > u) edges.push([u, v]);
+  for (const u of activeNodes) for (const v of (activeAdj[u] || [])) if (v > u) edges.push([u, v]);
 
   const modeDescriptions = {
     bfs:      'Explores level by level using a Queue (FIFO). Guarantees shortest path in unweighted graphs.',
@@ -98,14 +134,49 @@ export default function GraphViz({ color }) {
 
   return (
     <div>
+      {/* Custom Graph toggle */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 8, alignItems: 'center' }}>
+        <button onClick={() => { setCustomMode(m => !m); if (customMode) { setCustomAdj(null); setStart(0); } }}
+          style={{ padding: '4px 12px', borderRadius: 20, border: `1px solid ${customMode ? T.or : T.bd}`, background: customMode ? T.or + '20' : 'transparent', color: customMode ? T.or : T.t2, cursor: 'pointer', fontSize: 11, fontWeight: customMode ? 700 : 400 }}>
+          {customMode ? '⊙ Custom Graph' : '✎ Custom Graph'}
+        </button>
+        {customMode && (
+          <button onClick={() => { setCustomAdj(null); setStart(0); setCustomEdges(''); }}
+            style={{ padding: '4px 10px', borderRadius: 20, border: `1px solid ${T.bd}`, background: 'transparent', color: T.t2, cursor: 'pointer', fontSize: 11 }}>
+            ↺ Preset Graph
+          </button>
+        )}
+      </div>
+
+      {/* Custom graph input */}
+      {customMode && (
+        <div style={{ marginBottom: 10, padding: '10px 12px', background: T.s2, borderRadius: 10, border: `1px solid ${T.or}30` }}>
+          <div style={{ fontSize: 10, color: T.t3, marginBottom: 6 }}>Enter edges as <span style={{ color: T.or }}>node-node:weight</span> separated by commas (e.g. <span style={{ color: T.or, fontFamily: 'monospace' }}>0-1:4, 1-2:3, 2-0:5</span>)</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <textarea value={customEdges} onChange={e => setCustomEdges(e.target.value)}
+              placeholder="0-1:4, 1-2:3, 2-3:1, 3-0:2"
+              style={{ flex: 1, padding: '6px 9px', borderRadius: 8, border: `1px solid ${T.or}50`, background: T.s1, color: T.t0, fontSize: 12, fontFamily: 'monospace', resize: 'vertical', minHeight: 52, outline: 'none' }} />
+            <button onClick={() => {
+              const parsed = parseCustomEdges(customEdges);
+              if (parsed.nodes.length > 0) {
+                setCustomAdj(parsed);
+                setStart(parsed.nodes[0]);
+              }
+            }} style={{ padding: '6px 14px', borderRadius: 8, background: T.or + '25', border: `1px solid ${T.or}60`, color: T.or, fontWeight: 700, cursor: 'pointer', fontSize: 12, alignSelf: 'flex-start' }}>
+              Build
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Mode selector */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         {[['bfs', '⊞ BFS', T.cy], ['dfs', '↓ DFS', T.pu], ['dijkstra', '⊕ Dijkstra', T.gn]].map(([m, label, c]) => (
           <button key={m} onClick={() => setMode(m)} style={{ padding: '4px 12px', borderRadius: 20, border: `1px solid ${mode === m ? c : T.bd}`, background: mode === m ? c + '20' : 'transparent', color: mode === m ? c : T.t2, cursor: 'pointer', fontSize: 11, fontWeight: mode === m ? 700 : 400 }}>{label}</button>
         ))}
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center', fontSize: 10.5, color: T.t2 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center', fontSize: 10.5, color: T.t2, flexWrap: 'wrap' }}>
           Start:
-          {Array.from({ length: NC }, (_, i) => (
+          {activeNodes.map(i => (
             <button key={i} onClick={() => setStart(i)} style={{ width: 22, height: 22, borderRadius: '50%', border: `1px solid ${start === i ? color : T.bd}`, background: start === i ? color + '30' : 'transparent', color: start === i ? color : T.t2, cursor: 'pointer', fontSize: 10, padding: 0 }}>{i}</button>
           ))}
           <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', marginLeft: 6 }}>
@@ -124,20 +195,22 @@ export default function GraphViz({ color }) {
         <svg width="100%" viewBox="0 0 560 320" style={{ display: 'block' }}>
           {/* Edges */}
           {edges.map(([u, v]) => {
-            const mx = (POS[u].x + POS[v].x) / 2, my = (POS[u].y + POS[v].y) / 2;
-            const w  = WEIGHTS[`${Math.min(u,v)}-${Math.max(u,v)}`];
+            const pu = activePOS[u], pv = activePOS[v];
+            const mx = (pu.x + pv.x) / 2, my = (pu.y + pv.y) / 2;
+            const w  = activeWeights[`${Math.min(u,v)}-${Math.max(u,v)}`];
             return (
               <g key={`${u}-${v}`}>
-                <line x1={POS[u].x} y1={POS[u].y} x2={POS[v].x} y2={POS[v].y}
+                <line x1={pu.x} y1={pu.y} x2={pv.x} y2={pv.y}
                   stroke={edgeColor(u, v)} strokeWidth={edgeWidth(u, v)} style={{ transition: 'stroke .2s, stroke-width .2s' }} />
                 {showW && <text x={mx} y={my - 6} textAnchor="middle" fill={T.t3} fontSize={9} fontFamily="monospace">{w}</text>}
               </g>
             );
           })}
           {/* Nodes */}
-          {Array.from({ length: NC }, (_, i) => {
-            const p = POS[i]; const nc = nodeColor(i); const isCur = st?.cur === i;
-            const d = mode === 'dijkstra' && st?.dist?.[i] !== undefined && st.dist[i] !== Infinity ? st.dist[i] : null;
+          {activeNodes.map(i => {
+            const p = activePOS[i]; const nc = nodeColor(i); const isCur = st?.cur === i;
+            const distArr = st?.dist;
+            const d = mode === 'dijkstra' && distArr && distArr[i] !== undefined && distArr[i] !== Infinity ? distArr[i] : null;
             return (
               <g key={i}>
                 {isCur && <circle cx={p.x} cy={p.y} r={26} fill={color + '18'} style={{ animation: 'pulse 1s infinite' }} />}
@@ -165,13 +238,16 @@ export default function GraphViz({ color }) {
         {mode === 'dijkstra' && st?.dist && (
           <div style={{ padding: '7px 11px', background: T.s2, borderRadius: 8, border: `1px solid ${T.bd}`, fontSize: 11 }}>
             <div style={{ color: T.t3, marginBottom: 4, fontSize: 10, fontWeight: 700 }}>SHORTEST DISTANCES FROM {start}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 3 }}>
-              {st.dist.map((d, i) => (
-                <div key={i} style={{ textAlign: 'center', padding: '2px 0' }}>
-                  <div style={{ fontSize: 9, color: T.t3 }}>→{i}</div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: d === Infinity ? T.t3 : T.cy }}>{d === Infinity ? '∞' : d}</div>
-                </div>
-              ))}
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(5, activeNodes.length)},1fr)`, gap: 3 }}>
+              {activeNodes.map(i => {
+                const d = st.dist[i];
+                return (
+                  <div key={i} style={{ textAlign: 'center', padding: '2px 0' }}>
+                    <div style={{ fontSize: 9, color: T.t3 }}>→{i}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: d === undefined || d === Infinity ? T.t3 : T.cy }}>{d === undefined || d === Infinity ? '∞' : d}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

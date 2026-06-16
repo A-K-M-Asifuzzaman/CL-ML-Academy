@@ -8,6 +8,16 @@ import { TOPICS } from '../data/topics.js';
 import { CATEGORIES } from '../data/categories.js';
 import { LEVELS } from '../hooks/useProgress.js';
 
+function useIsMobile(bp = 768) {
+  const [m, setM] = useState(() => typeof window !== 'undefined' ? window.innerWidth < bp : false);
+  useEffect(() => {
+    const h = () => setM(window.innerWidth < bp);
+    window.addEventListener('resize', h);
+    return () => window.removeEventListener('resize', h);
+  }, [bp]);
+  return m;
+}
+
 function XpBar({ progress, level, nextLevel, xpProgress }) {
   const barRef = useRef(null);
   useEffect(() => {
@@ -204,6 +214,7 @@ function StreakCalendar({ progress }) {
 }
 
 export default function DashboardPage() {
+  const isMobile = useIsMobile(768);
   const { progress, level, nextLevel, xpProgress, allAchievements, resetProgress } = useProgressCtx();
   const [showReset, setShowReset] = useState(false);
   const pageRef = useRef(null);
@@ -218,9 +229,9 @@ export default function DashboardPage() {
   const totalXpFromChallenges = CHALLENGES.filter(c => progress.challengesSolved.includes(c.id)).reduce((s, c) => s + c.xp, 0);
 
   return (
-    <div ref={pageRef} style={{ maxWidth: 1200, margin: '0 auto', padding: '0 20px 60px' }}>
+    <div ref={pageRef} style={{ maxWidth: 1200, margin: '0 auto', padding: isMobile ? '0 12px 60px' : '0 20px 60px' }}>
       {/* Header */}
-      <div style={{ padding: '28px 0 20px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+      <div style={{ padding: isMobile ? '16px 0 14px' : '28px 0 20px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
         <div>
           <div style={{ fontSize: 11, color: T.cy, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 6 }}>Your Learning Journey</div>
           <h1 style={{ fontSize: 26, fontWeight: 900, color: T.t0, margin: 0, letterSpacing: -1 }}>Dashboard</h1>
@@ -246,8 +257,8 @@ export default function DashboardPage() {
         <StatCard icon="⭐" value={progress.perfectQuizzes}      label="Perfect Quizzes"    color={T.pk}  delay={0.25} />
       </div>
 
-      {/* Main 3-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20 }}>
+      {/* Main layout — single column on mobile, two on desktop */}
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 300px', gap: 20 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <AchievementsGrid allAchievements={allAchievements} />
           <RecentActivity progress={progress} />
@@ -261,10 +272,11 @@ export default function DashboardPage() {
             <h3 style={{ fontSize: 15, fontWeight: 700, color: T.t0, marginBottom: 12 }}>Quick Actions</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { label: '▶ Code Playground', to: '/playground', color: T.cy },
+                { label: '▶ Code Playground', to: '/playground',  color: T.cy },
                 { label: '⚔️ Browse Challenges', to: '/challenges', color: T.gn },
-                { label: '🗺️ Roadmap', to: '/roadmap', color: T.pu },
-                { label: '📊 Big-O Reference', to: '/bigo', color: T.ye },
+                { label: '📚 Spaced Review',   to: '/review',      color: T.pu },
+                { label: '🏆 Leaderboard',     to: '/leaderboard', color: T.ye },
+                { label: '🗺️ Roadmap',         to: '/roadmap',     color: T.or },
               ].map(a => (
                 <Link key={a.to} to={a.to} style={{ textDecoration: 'none', padding: '10px 14px', borderRadius: 9, background: T.s1, border: `1px solid ${a.color}25`, color: a.color, fontSize: 13, fontWeight: 600, display: 'block', transition: 'all .15s' }}
                   onMouseEnter={e => { e.currentTarget.style.background = a.color + '10'; e.currentTarget.style.borderColor = a.color + '60'; }}
