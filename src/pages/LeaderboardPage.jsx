@@ -76,11 +76,10 @@ export default function LeaderboardPage() {
   // ── styles ────────────────────────────────────────────────────────────────
   const page = {
     minHeight: '100vh',
-    background: T.bg,
     color: T.t0,
-    fontFamily: 'monospace',
-    padding: mobile ? '16px 12px' : '32px 24px',
-    maxWidth: 800,
+    fontFamily: 'var(--font-sans)',
+    padding: mobile ? '16px 14px 80px' : '30px 24px 90px',
+    maxWidth: 820,
     margin: '0 auto',
   };
 
@@ -132,43 +131,24 @@ export default function LeaderboardPage() {
   return (
     <div style={page}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: mobile ? 'flex-start' : 'center', justifyContent: 'space-between', gap: 12, marginBottom: 28, flexDirection: mobile ? 'column' : 'row' }}>
+      <div style={{ display: 'flex', alignItems: mobile ? 'flex-start' : 'flex-end', justifyContent: 'space-between', gap: 12, marginBottom: 24, flexDirection: mobile ? 'column' : 'row' }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: mobile ? 22 : 28, fontWeight: 700, letterSpacing: -0.5 }}>
-            🏆 Leaderboard
-          </h1>
-          <div style={{ color: T.t2, fontSize: 13, marginTop: 4 }}>
-            Top learners ranked by XP
-          </div>
+          <div className="kicker" style={{ marginBottom: 8 }}>Global ranking</div>
+          <h1 className="h-display" style={{ margin: 0, fontSize: mobile ? 26 : 34, color: T.t0 }}>Leaderboard</h1>
+          <div style={{ color: T.t2, fontSize: 13.5, marginTop: 6 }}>Top learners ranked by XP</div>
         </div>
-        <button
-          onClick={() => setRefreshKey(k => k + 1)}
-          style={{ ...btn(T.s2), border: `1px solid ${T.bd}`, color: T.t1 }}
-          disabled={loading}
-        >
+        <button onClick={() => setRefreshKey(k => k + 1)} className="btn3 btn3-line" style={{ height: 40 }} disabled={loading}>
           {loading ? '⟳ Loading…' : '⟳ Refresh'}
         </button>
       </div>
 
       {/* My rank banner */}
       {user && myEntry && (
-        <div style={{
-          background: T.cy + '11',
-          border: `1px solid ${T.cy}44`,
-          borderRadius: 12,
-          padding: '12px 16px',
-          marginBottom: 20,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          flexWrap: 'wrap',
-        }}>
-          <span style={{ fontSize: 20 }}>📍</span>
+        <div className="ring-card spotlight" style={{ '--ac': T.cy, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+          <div style={{ width: 40, height: 40, borderRadius: 11, background: T.cy + '16', color: T.cy, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontFamily: 'var(--font-display)' }}>#{myRank}</div>
           <div>
-            <span style={{ color: T.cy, fontWeight: 700 }}>Your rank: #{myRank}</span>
-            <span style={{ color: T.t2, fontSize: 12, marginLeft: 8 }}>
-              {progress.xp} XP · {level.name}
-            </span>
+            <div style={{ color: T.t0, fontWeight: 700, fontSize: 14 }}>Your rank</div>
+            <div style={{ color: T.t2, fontSize: 12.5, marginTop: 1 }}>{progress.xp.toLocaleString()} XP · {level.name}</div>
           </div>
         </div>
       )}

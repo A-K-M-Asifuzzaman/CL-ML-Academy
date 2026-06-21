@@ -119,11 +119,10 @@ export default function ReviewPage() {
   // ── styles ──────────────────────────────────────────────────────────────
   const page = {
     minHeight: '100vh',
-    background: T.bg,
     color: T.t0,
-    fontFamily: 'monospace',
-    padding: mobile ? '16px 12px' : '32px 24px',
-    maxWidth: 960,
+    fontFamily: 'var(--font-sans)',
+    padding: mobile ? '16px 14px 80px' : '30px 24px 90px',
+    maxWidth: 980,
     margin: '0 auto',
   };
 
@@ -334,13 +333,10 @@ export default function ReviewPage() {
   return (
     <div style={page}>
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ margin: 0, fontSize: mobile ? 22 : 28, fontWeight: 700, letterSpacing: -0.5 }}>
-          📚 Spaced Review
-        </h1>
-        <div style={{ color: T.t2, fontSize: 13, marginTop: 4 }}>
-          SM-2 spaced repetition — study smarter, not harder
-        </div>
+      <div style={{ marginBottom: 24 }}>
+        <div className="kicker" style={{ marginBottom: 8 }}>SM-2 spaced repetition</div>
+        <h1 className="h-display" style={{ margin: 0, fontSize: mobile ? 26 : 34, color: T.t0 }}>Spaced Review</h1>
+        <div style={{ color: T.t2, fontSize: 13.5, marginTop: 6 }}>Study smarter — review each topic right before you'd forget it.</div>
       </div>
 
       {/* Stats row */}

@@ -156,36 +156,36 @@ export default function ChallengePage() {
   });
 
   return (
-    <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 20px 60px' }}>
+    <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 20px 70px' }}>
       {/* Breadcrumb */}
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center', padding: '16px 0 12px', fontSize: 12, color: T.t2 }}>
-        <Link to="/" style={{ color: T.t2, textDecoration: 'none' }}>Home</Link>
-        <span>›</span>
-        <Link to="/challenges" style={{ color: T.cy, textDecoration: 'none' }}>Challenges</Link>
-        <span>›</span>
-        <span style={{ color: T.t0 }}>{challenge.title}</span>
+      <div style={{ display: 'flex', gap: 7, alignItems: 'center', padding: '18px 0 14px', fontSize: 12.5, color: T.t2 }}>
+        <Link to="/" className="link-underline" style={{ color: T.t2, textDecoration: 'none' }}>Home</Link>
+        <span style={{ color: T.t3 }}>/</span>
+        <Link to="/challenges" className="link-underline" style={{ color: T.t2, textDecoration: 'none' }}>Challenges</Link>
+        <span style={{ color: T.t3 }}>/</span>
+        <span style={{ color: T.t1 }}>{challenge.title}</span>
       </div>
 
       {/* Header bar */}
-      <div ref={headerRef} style={{ padding: '16px 20px', borderRadius: 12, border: `1px solid ${T.bd}`, background: T.s1, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+      <div ref={headerRef} className="ring-card spotlight" style={{ '--ac': diffColor, padding: '20px 22px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-            <h1 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: T.t0 }}>{challenge.title}</h1>
-            <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 12, background: diffColor + '18', color: diffColor, border: `1px solid ${diffColor}30`, textTransform: 'capitalize', fontWeight: 600 }}>{challenge.difficulty}</span>
-            {(alreadySolved || solved) && <span style={{ fontSize: 11, padding: '2px 10px', borderRadius: 12, background: T.gn + '18', color: T.gn, border: `1px solid ${T.gn}30` }}>✓ Solved</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, flexWrap: 'wrap' }}>
+            <h1 className="h-display" style={{ margin: 0, fontSize: 23, color: T.t0 }}>{challenge.title}</h1>
+            <span style={{ fontSize: 10.5, padding: '3px 11px', borderRadius: 999, background: diffColor + '18', color: diffColor, border: `1px solid ${diffColor}30`, textTransform: 'capitalize', fontWeight: 600 }}>{challenge.difficulty}</span>
+            {(alreadySolved || solved) && <span style={{ fontSize: 10.5, padding: '3px 11px', borderRadius: 999, background: T.gn + '18', color: T.gn, border: `1px solid ${T.gn}30` }}>✓ Solved</span>}
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {challenge.tags.map(t => <span key={t} style={{ fontSize: 10, padding: '1px 7px', borderRadius: 8, background: T.s2, color: T.t3, border: `1px solid ${T.bd}` }}>{t}</span>)}
+            {challenge.tags.map(t => <span key={t} className="chip" style={{ fontSize: 10 }}>{t}</span>)}
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <XpBadge xp={challenge.xp} color={diffColor} />
-          {topic && <Link to={`/topic/${topic.id}`} style={{ fontSize: 12, color: topic.color, textDecoration: 'none', background: topic.color + '10', border: `1px solid ${topic.color}30`, padding: '4px 10px', borderRadius: 8 }}>→ {topic.title}</Link>}
+          {topic && <Link to={`/topic/${topic.id}`} className="btn3 btn3-line" style={{ height: 36, padding: '0 14px', fontSize: 12.5, textDecoration: 'none' }}>→ {topic.title}</Link>}
         </div>
       </div>
 
       {/* Main 2-column layout */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
+      <div className="challenge-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
         {/* Left: description */}
         <div style={{ borderRadius: 12, border: `1px solid ${T.bd}`, overflow: 'hidden' }}>
           <div style={{ display: 'flex', borderBottom: `1px solid ${T.bd}`, background: T.s1 }}>

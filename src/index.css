@@ -885,6 +885,7 @@ kbd {
   .hero-showcase { display: none !important; }
   .auth-split { grid-template-columns: 1fr !important; max-width: 440px !important; }
   .auth-brand { display: none !important; }
+  .challenge-2col { grid-template-columns: 1fr !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
