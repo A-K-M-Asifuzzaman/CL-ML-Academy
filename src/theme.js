@@ -1,10 +1,13 @@
 export const T = {
-  bg:'#060b14', s1:'#0b1120', s2:'#0f1830', s3:'#162040', s4:'#1e2d50',
-  bd:'#2a3a5c', bd2:'#1e2d50',
-  t0:'#f0f6ff', t1:'#c8d6f0', t2:'#7a90b8', t3:'#4a5e88',
-  cy:'#00e5ff', gn:'#00ffa3', pu:'#b388ff', or:'#ff9d00',
-  rd:'#ff4f6d', ye:'#ffd600', pk:'#ff6eb4', bl:'#4db8ff',
-  mg:'#e040fb', tl:'#00e5cc',
+  // Clean neutral "zinc" dark base — modern SaaS (Linear / Vercel / shadcn)
+  bg:'#09090b', s1:'#101012', s2:'#161618', s3:'#202023', s4:'#2a2a2e',
+  bd:'#27272a', bd2:'#1b1b1e',
+  // High-contrast, readable neutral text ramp
+  t0:'#fafafa', t1:'#d4d4d8', t2:'#a1a1aa', t3:'#71717a',
+  // Refined, restrained accent set (sky primary)
+  cy:'#38bdf8', gn:'#4ade80', pu:'#a78bfa', or:'#fb923c',
+  rd:'#f87171', ye:'#facc15', pk:'#f472b6', bl:'#60a5fa',
+  mg:'#c084fc', tl:'#2dd4bf',
 };
 
 export const CAT_COLORS = {

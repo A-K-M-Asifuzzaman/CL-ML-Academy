@@ -7,29 +7,32 @@ export function SimControls({ sim, color = T.cy }) {
     sim.seek(Math.round(((e.clientX - r.left) / r.width) * (sim.total - 1)));
   };
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 12px', background:T.s2, borderRadius:8, border:`1px solid ${T.bd}`, flexWrap:'wrap', marginTop:10 }}>
-      <div style={{ display:'flex', gap:3 }}>
-        {[['⏮','reset'],['⏪','prev'],['pp','pp'],['⏩','next']].map(([icon, act]) => (
-          <button key={act}
+    <div className="glass-2" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', borderRadius:12, flexWrap:'wrap', marginTop:12 }}>
+      <div style={{ display:'flex', gap:4 }}>
+        {[['⏮','reset','Restart'],['⏪','prev','Step back'],['pp','pp','Play/Pause'],['⏩','next','Step forward']].map(([icon, act, title]) => (
+          <button key={act} title={title}
             onClick={act === 'pp' ? (sim.playing ? sim.pause : sim.play) : sim[act]}
-            style={{ width:28, height:28, borderRadius:5, border:'none', cursor:'pointer', fontSize:13,
-              background: act === 'pp' ? color + 'cc' : T.s3,
-              color: act === 'pp' ? T.bg : T.t1, flexShrink:0 }}>
+            style={{ width: act==='pp'?34:30, height:30, borderRadius:8, border: act==='pp'?'none':`1px solid ${T.bd}`, cursor:'pointer', fontSize:13, display:'flex', alignItems:'center', justifyContent:'center',
+              background: act === 'pp' ? `linear-gradient(135deg, ${color}, ${color}bb)` : 'rgba(255,255,255,.03)',
+              color: act === 'pp' ? T.bg : T.t1, flexShrink:0, transition:'all .15s', fontWeight: act==='pp'?700:400,
+              boxShadow: act==='pp' ? `0 4px 14px -4px ${color}` : 'none' }}
+            onMouseEnter={e => { if(act!=='pp'){ e.currentTarget.style.borderColor = color+'70'; e.currentTarget.style.color = color; } }}
+            onMouseLeave={e => { if(act!=='pp'){ e.currentTarget.style.borderColor = T.bd; e.currentTarget.style.color = T.t1; } }}>
             {act === 'pp' ? (sim.playing ? '⏸' : '▶') : icon}
           </button>
         ))}
       </div>
-      <div style={{ flex:1, minWidth:80, cursor:'pointer' }} onClick={handleSeek}>
-        <div style={{ height:3, background:T.s3, borderRadius:2 }}>
-          <div style={{ height:'100%', width:`${sim.progress * 100}%`, background:color, borderRadius:2, transition:'width .08s' }} />
+      <div style={{ flex:1, minWidth:90, cursor:'pointer' }} onClick={handleSeek}>
+        <div style={{ height:5, background:T.s3, borderRadius:3, position:'relative', overflow:'hidden' }}>
+          <div style={{ height:'100%', width:`${sim.progress * 100}%`, background:`linear-gradient(90deg, ${color}, ${T.pu})`, borderRadius:3, transition:'width .08s', boxShadow:`0 0 8px ${color}80` }} />
         </div>
-        <div style={{ fontSize:10, color:T.t2, marginTop:2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
-          {sim.idx + 1}/{sim.total}{sim.state?.msg ? ` — ${sim.state.msg}` : ''}
+        <div style={{ fontSize:10, color:T.t2, marginTop:3, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+          <span style={{ fontFamily:'var(--font-mono)', color:color }}>{sim.idx + 1}/{sim.total}</span>{sim.state?.msg ? ` — ${sim.state.msg}` : ''}
         </div>
       </div>
       <select value={sim.speed} onChange={e => sim.setSpeed(+e.target.value)}
-        style={{ background:T.s3, color:T.t1, border:`1px solid ${T.bd}`, borderRadius:5, padding:'2px 5px', fontSize:11 }}>
-        {[0.25, 0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}x</option>)}
+        style={{ background:T.s3, color:T.t1, border:`1px solid ${T.bd}`, borderRadius:7, padding:'4px 7px', fontSize:11, cursor:'pointer' }}>
+        {[0.25, 0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}×</option>)}
       </select>
     </div>
   );

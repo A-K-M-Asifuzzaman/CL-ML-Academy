@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import Navbar from './components/Navbar.jsx';
 import AchievementToast from './components/AchievementToast.jsx';
+import AuroraBackground from './components/AuroraBackground.jsx';
 import HomePage from './pages/HomePage.jsx';
 import CategoryPage from './pages/CategoryPage.jsx';
 import TopicPage from './pages/TopicPage.jsx';
@@ -38,7 +39,9 @@ function ProtectedRoute({ children }) {
 export default function App() {
   const { user } = useAuth();
   return (
-    <div style={{ minHeight: '100vh', background: T.bg, color: T.t1, fontFamily: 'var(--font-sans)' }}>
+    <div style={{ minHeight: '100vh', background: T.bg, color: T.t1, fontFamily: 'var(--font-sans)', position: 'relative' }}>
+      <AuroraBackground />
+      <div className="app-content">
       <ScrollToTop />
       {user && <Navbar />}
       {user && <AchievementToast />}
@@ -60,6 +63,7 @@ export default function App() {
         </Routes>
       </main>
       {user && <Footer />}
+      </div>
     </div>
   );
 }

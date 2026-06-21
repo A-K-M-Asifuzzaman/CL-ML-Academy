@@ -33,16 +33,38 @@ const MAP = {
   gd:         (c) => <GradDescentViz color={c} />,
 };
 
+const VIZ_LABEL = {
+  sorting: 'Sorting Engine', bsearch: 'Binary Search', linkedlist: 'Linked List',
+  stack: 'Stack (LIFO)', queue: 'Queue (FIFO)', recursion: 'Recursion Tree',
+  nqueens: 'N-Queens Solver', bst: 'Binary Search Tree', graph: 'Graph Algorithms',
+  dp: 'Dynamic Programming', hash: 'Hash Table', bigo: 'Complexity Analyzer',
+  neuralnet: 'Neural Network', attention: 'Attention Mechanism', gd: 'Gradient Descent',
+};
+
 export default function VizBlock({ topic }) {
   if (!topic.viz || topic.viz === 'none') return null;
   const render = MAP[topic.viz];
   if (!render) return null;
+  const c = topic.color;
   return (
-    <div style={{ padding: '12px 16px', background: '#0b1120', borderRadius: 10, border: `1px solid ${topic.color}30` }}>
-      <div style={{ fontSize: 11, color: topic.color, marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
-        ▶ Interactive Simulation
+    <div className="viz-frame" style={{ padding: 0, borderColor: c + '33' }}>
+      {/* Header bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: `1px solid ${c}22`, background: `linear-gradient(90deg, ${c}12, transparent)`, position: 'relative', zIndex: 1 }}>
+        <span style={{ position: 'relative', width: 8, height: 8, flexShrink: 0 }}>
+          <span style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: c, boxShadow: `0 0 8px ${c}` }} />
+          <span style={{ position: 'absolute', inset: -3, borderRadius: '50%', border: `1.5px solid ${c}`, animation: 'pulse 1.6s ease-in-out infinite' }} />
+        </span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: c, letterSpacing: 1.5, textTransform: 'uppercase' }}>
+          {VIZ_LABEL[topic.viz] || 'Interactive'}
+        </span>
+        <span className="hide-mobile" style={{ fontSize: 10, color: 'var(--t3)', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#28c840' }} /> Live Simulation
+        </span>
       </div>
-      {render(topic.color)}
+      {/* Body */}
+      <div style={{ padding: '16px', position: 'relative', zIndex: 1 }}>
+        {render(c)}
+      </div>
     </div>
   );
 }

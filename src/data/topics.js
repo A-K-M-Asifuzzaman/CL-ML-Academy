@@ -1,6 +1,8 @@
 import { T } from '../theme.js';
+import { EXTRA_TOPICS } from './topicsExtra.js';
+import { EXTRA_TOPICS_2 } from './topicsExtra2.js';
 
-export const TOPICS = [
+const BASE_TOPICS = [
   // ── Core DSA ──────────────────────────────────────────────────────────
   { id:'arrays', cat:'dsa', title:'Arrays', icon:'▦', viz:'sorting', color:T.cy,
     tags:['O(1) access','Contiguous','Prefix Sum','Two Pointers','Kadane','Dutch Flag'],
@@ -2702,6 +2704,8 @@ outputs = model.generate(**inputs, generation_config=gen_config)`,
   },
 
 ];
+
+export const TOPICS = [...BASE_TOPICS, ...EXTRA_TOPICS, ...EXTRA_TOPICS_2];
 
 export const getTopicById = id => TOPICS.find(t => t.id === id);
 export const getTopicsByCategory = cat => TOPICS.filter(t => t.cat === cat);
