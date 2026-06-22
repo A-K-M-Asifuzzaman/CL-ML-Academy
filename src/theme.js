@@ -1,13 +1,14 @@
 export const T = {
-  // Clean neutral "zinc" dark base — modern SaaS (Linear / Vercel / shadcn)
-  bg:'#09090b', s1:'#101012', s2:'#161618', s3:'#202023', s4:'#2a2a2e',
+  // Aura — cinematic near-black glass base
+  bg:'#0c0c0c', s1:'#101012', s2:'#161618', s3:'#202023', s4:'#2a2a2e',
   bd:'#27272a', bd2:'#1b1b1e',
   // High-contrast, readable neutral text ramp
   t0:'#fafafa', t1:'#d4d4d8', t2:'#a1a1aa', t3:'#71717a',
-  // Refined, restrained accent set (sky primary)
-  cy:'#38bdf8', gn:'#4ade80', pu:'#a78bfa', or:'#fb923c',
-  rd:'#f87171', ye:'#facc15', pk:'#f472b6', bl:'#60a5fa',
-  mg:'#c084fc', tl:'#2dd4bf',
+  // Aura accent set — electric cyan primary, brand blue, icy highlight, deep navies
+  cy:'#00d2ff', gn:'#10b981', pu:'#a78bfa', or:'#f59e0b',
+  rd:'#f87171', ye:'#facc15', pk:'#f472b6', bl:'#3D81E3',
+  mg:'#c084fc', tl:'#A4F4FD',
+  nv:'#0B2551', ink:'#091020', brand:'#3D81E3',
 };
 
 export const CAT_COLORS = {

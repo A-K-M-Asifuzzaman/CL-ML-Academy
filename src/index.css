@@ -3,7 +3,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:  #09090b;
+  --bg:  #0c0c0c;
   --s1:  #101012;
   --s2:  #161618;
   --s3:  #202023;
@@ -14,16 +14,19 @@
   --t1:  #d4d4d8;
   --t2:  #a1a1aa;
   --t3:  #71717a;
-  --cy:  #38bdf8;
-  --gn:  #4ade80;
+  --cy:  #00d2ff;
+  --gn:  #10b981;
   --pu:  #a78bfa;
-  --or:  #fb923c;
+  --or:  #f59e0b;
   --rd:  #f87171;
   --ye:  #facc15;
   --pk:  #f472b6;
-  --bl:  #60a5fa;
+  --bl:  #3D81E3;
   --mg:  #c084fc;
-  --tl:  #2dd4bf;
+  --tl:  #A4F4FD;
+  --nv:    #0B2551;
+  --ink:   #091020;
+  --brand: #3D81E3;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Sora', 'Inter', system-ui, sans-serif;
   --font-serif: 'Fraunces', ui-serif, Georgia, serif;
@@ -888,7 +891,59 @@ kbd {
   .challenge-2col { grid-template-columns: 1fr !important; }
 }
 
+/* ═════════════════════════════════════════════════════════════════════════
+   ✦ SYNCED CODE TRACE — live line-by-line highlight beside each animation
+   ═════════════════════════════════════════════════════════════════════════ */
+
+.code-trace {
+  margin-top: 12px;
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  background: #070b12;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.code-trace-head {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--bd);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ct, var(--cy)) 16%, transparent), transparent 70%);
+}
+.ct-pulse {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ct, var(--cy));
+  box-shadow: 0 0 10px var(--ct, var(--cy));
+  animation: ctPulse 1.4s ease-in-out infinite;
+}
+@keyframes ctPulse { 0%,100% { opacity:.45; transform:scale(.8); } 50% { opacity:1; transform:scale(1.18); } }
+.ct-title { font-size: 11px; font-weight: 700; letter-spacing: .04em; color: var(--ct, var(--cy)); }
+.ct-tag { margin-left: auto; font-size: 10px; color: var(--t3); font-family: var(--font-mono); }
+.code-trace-body { padding: 10px 0; font-size: 12px; line-height: 1.7; overflow-x: auto; }
+.ct-line {
+  display: grid; grid-template-columns: 32px 16px 1fr; align-items: start;
+  padding: 1px 14px 1px 0;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.ct-num { text-align: right; color: var(--t3); font-family: var(--font-mono); font-size: 10px; user-select: none; padding-top: 1px; }
+.ct-arrow { color: var(--ct, var(--cy)); font-size: 9px; text-align: center; padding-top: 1px; }
+.ct-code { font-family: var(--font-mono); color: var(--t1); white-space: pre; }
+.ct-active {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ct, var(--cy)) 24%, transparent), transparent 88%);
+  box-shadow: inset 3px 0 0 var(--ct, var(--cy));
+  animation: ctLineIn .28s ease;
+}
+.ct-active .ct-code { color: #fff; }
+.ct-active .ct-num  { color: var(--ct, var(--cy)); }
+.ct-active .ct-arrow { animation: ctArrow .9s ease-in-out infinite; }
+@keyframes ctLineIn { from { opacity: .35; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+@keyframes ctArrow  { 0%,100% { transform: translateX(0); opacity: .7; } 50% { transform: translateX(2px); opacity: 1; } }
+
+/* ── Richer entrance for visualizer frames ── */
+.viz-frame { animation: vizIn .5s var(--ease-out-expo) both; }
+@keyframes vizIn { from { opacity: 0; transform: translateY(14px) scale(.99); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
   .float-slow, .float-med { animation: none !important; }
+  .ct-pulse, .ct-active, .ct-active .ct-arrow, .viz-frame { animation: none !important; }
   * { scroll-behavior: auto !important; }
 }

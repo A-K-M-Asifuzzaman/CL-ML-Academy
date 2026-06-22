@@ -36,6 +36,6 @@ export default function GradDescentViz({color}){
       <div style={{padding:'5px 10px',background:T.s2,borderRadius:7,border:`1px solid ${T.bd}`,fontSize:12}}><span style={{color:T.t2}}>x = </span><span style={{color,fontFamily:'var(--font-mono)'}}>{st.x.toFixed(5)}</span></div>
       <div style={{padding:'5px 10px',background:T.s2,borderRadius:7,border:`1px solid ${T.bd}`,fontSize:12}}><span style={{color:T.t2}}>f(x) = </span><span style={{color:T.ye,fontFamily:'var(--font-mono)'}}>{st.fx.toFixed(6)}</span></div>
     </div>}
-    <SimControls sim={sim} color={color}/>
+    <SimControls sim={sim} color={color} codeKey="gd"/>
   </div>);
 }

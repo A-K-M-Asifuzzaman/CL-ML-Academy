@@ -208,7 +208,7 @@ export default function DPViz({ color }) {
 
       {renderContent()}
 
-      <SimControls sim={sim} color={color} />
+      <SimControls sim={sim} color={color} codeKey={prob} />
     </div>
   );
 }

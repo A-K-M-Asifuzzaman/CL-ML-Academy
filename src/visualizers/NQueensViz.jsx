@@ -17,6 +17,6 @@ export default function NQueensViz({color}){
       {board.flat().map((v,i)=>{const r=Math.floor(i/n),c=i%n;const isTry=st?.try&&st.try[0]===r&&st.try[1]===c;const isPlaced=v===1;const isDark=(r+c)%2===0;return(<div key={i} style={{width:cellSize,height:cellSize,borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,background:isPlaced?color+'35':isTry?T.ye+'25':isDark?T.s3:T.s2,border:`1px solid ${isPlaced?color:isTry?T.ye:T.bd}`,transition:'all .15s',boxShadow:isPlaced?`0 0 8px ${color}60`:''}}>{isPlaced?'♛':isTry?'·':''}</div>);})}
     </div>
     {st?.found&&<div style={{padding:'7px 12px',background:T.gn+'20',borderRadius:7,border:`1px solid ${T.gn}40`,fontSize:13,color:T.gn,marginBottom:8}}>Solution found!</div>}
-    <SimControls sim={sim} color={color}/>
+    <SimControls sim={sim} color={color} codeKey="nqueens"/>
   </div>);
 }

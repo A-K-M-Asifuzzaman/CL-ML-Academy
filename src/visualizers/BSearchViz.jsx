@@ -16,6 +16,6 @@ export default function BSearchViz({color}){
     <div style={{display:'flex',gap:3,flexWrap:'wrap',marginBottom:10}}>
       {ARR.map((v,i)=>{const out=st&&(i<st.lo||i>st.hi)&&!st.done;const isMid=st?.mid===i;const isFound=st?.found===i;let bg=color+'1a',border=`1px solid ${color}30`,tc=T.t1;if(isFound){bg=T.gn;border=`2px solid ${T.gn}`;tc=T.bg;}else if(isMid){bg=T.ye+'40';border=`2px solid ${T.ye}`;tc=T.ye;}else if(out){bg='transparent';tc=T.t3;border='1px solid transparent';}return(<div key={i} style={{position:'relative',width:38,height:38,borderRadius:7,background:bg,border,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',transition:'all .2s'}}><span style={{fontSize:12,fontWeight:700,color:tc}}>{v}</span>{st?.lo===i&&<div style={{position:'absolute',top:-13,fontSize:8,color:T.bl,fontWeight:700}}>LO</div>}{st?.hi===i&&<div style={{position:'absolute',top:-13,fontSize:8,color:T.rd,fontWeight:700}}>HI</div>}{isMid&&<div style={{position:'absolute',top:-13,fontSize:8,color:T.ye,fontWeight:700}}>MID</div>}</div>);})}
     </div>
-    <SimControls sim={sim} color={color}/>
+    <SimControls sim={sim} color={color} codeKey="bsearch"/>
   </div>);
 }

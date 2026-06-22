@@ -107,7 +107,7 @@ export default function SortingViz({ color }) {
       </div>
 
       {/* Controls */}
-      <SimControls sim={sim} color={color} />
+      <SimControls sim={sim} color={color} codeKey={algo} />
 
       {/* Custom array input */}
       <div style={{ marginTop: 12, display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>

@@ -253,7 +253,7 @@ export default function GraphViz({ color }) {
         )}
       </div>
 
-      <SimControls sim={sim} color={color} />
+      <SimControls sim={sim} color={color} codeKey={mode} />
 
       {/* Complexity table */}
       <div style={{ marginTop: 10, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>

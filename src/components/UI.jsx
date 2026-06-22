@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { T } from '../theme.js';
+import CodeTrace from './CodeTrace.jsx';
 
-export function SimControls({ sim, color = T.cy }) {
+export function SimControls({ sim, color = T.cy, codeKey }) {
   const handleSeek = e => {
     const r = e.currentTarget.getBoundingClientRect();
     sim.seek(Math.round(((e.clientX - r.left) / r.width) * (sim.total - 1)));
   };
   return (
+    <>
+      {codeKey && <CodeTrace codeKey={codeKey} state={sim.state} color={color} />}
     <div className="glass-2" style={{ display:'flex', alignItems:'center', gap:8, padding:'9px 12px', borderRadius:12, flexWrap:'wrap', marginTop:12 }}>
       <div style={{ display:'flex', gap:4 }}>
         {[['⏮','reset','Restart'],['⏪','prev','Step back'],['pp','pp','Play/Pause'],['⏩','next','Step forward']].map(([icon, act, title]) => (
@@ -35,6 +38,7 @@ export function SimControls({ sim, color = T.cy }) {
         {[0.25, 0.5, 1, 2, 4].map(s => <option key={s} value={s}>{s}×</option>)}
       </select>
     </div>
+    </>
   );
 }
 

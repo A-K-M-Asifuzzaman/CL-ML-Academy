@@ -20,6 +20,6 @@ export default function RecursionViz({color}){
       </div>
     </div>
     {st?.ret!=null&&<div style={{padding:'6px 12px',background:T.gn+'20',borderRadius:7,border:`1px solid ${T.gn}40`,fontSize:13,color:T.gn,marginBottom:8}}>Return value: {st.ret}</div>}
-    <SimControls sim={sim} color={color}/>
+    <SimControls sim={sim} color={color} codeKey="fib"/>
   </div>);
 }
